@@ -711,6 +711,7 @@ class PolkascanHarvesterService(BaseService):
             id=block.id
         )
 
+        print("--------sequence_block: {}".format(block.id))
         if block:
             # Process block processors
             for processor_class in ProcessorRegistry().get_block_processors():
@@ -740,7 +741,7 @@ class PolkascanHarvesterService(BaseService):
                 extrinsic = None
                 if event.extrinsic_idx is not None:
                     extrinsic = extrinsics[event.extrinsic_idx]
-
+                print("---------event: {}".format(event.event_id))
                 for processor_class in ProcessorRegistry().get_event_processors(event.module_id, event.event_id):
                     event_processor = processor_class(block, event, extrinsic)
                     event_processor.sequencing_hook(
