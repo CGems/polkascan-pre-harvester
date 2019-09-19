@@ -157,6 +157,7 @@ def start_sequencer(self):
 @app.task(base=BaseTask, bind=True)
 def start_harvester(self, check_gaps=False):
 
+    print("---------- {}".format(check_gaps))
     substrate = SubstrateInterface(SUBSTRATE_RPC_URL)
 
     block_sets = []
