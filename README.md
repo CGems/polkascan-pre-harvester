@@ -5,7 +5,7 @@ Polkascan PRE Harvester Python Application
 
 ### 运行mysql
 ```
-docker-compose up -d mysql
+  docker-compose up -d mysql
 ```
 
 ### 连上mysql
