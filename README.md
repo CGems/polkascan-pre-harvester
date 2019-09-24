@@ -23,7 +23,7 @@ docker-compose up -d mysql
 
 ### 运行harvester
 ```
-docker-compose up
+  docker-compose up
 ```
 
 ### 增加version，并migrate
