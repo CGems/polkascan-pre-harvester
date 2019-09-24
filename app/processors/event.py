@@ -339,6 +339,7 @@ class NewSessionEventProcessor(EventProcessor):
 
     def sequencing_hook(self, db_session, parent_block_data, parent_sequenced_block_data):
         session_id = self.event.attributes[0]['value']
+        print("--------session_id: {}".format(session_id))
         self.add_session(db_session, session_id)
 
 

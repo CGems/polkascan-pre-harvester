@@ -721,6 +721,7 @@ class PolkascanHarvesterService(BaseService):
             id=block.id
         )
 
+        print("--------sequence_block: {}".format(block.id))
         if block:
             # Process block processors
             for processor_class in ProcessorRegistry().get_block_processors():
