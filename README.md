@@ -25,7 +25,7 @@ Polkascan PRE Harvester Python Application
 
 ### 运行harvester
 ```
-  docker-compose up
+  docker-compose up --build
 ```
 
 ### 增加version，并migrate
