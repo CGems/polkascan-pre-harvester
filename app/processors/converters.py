@@ -469,6 +469,7 @@ class PolkascanHarvesterService(BaseService):
         if Block.query(self.db_session).filter_by(hash=block_hash).count() > 0:
             raise BlockAlreadyAdded(block_hash)
 
+        print("--------sequence_block: {}".format(block.id))
         # Extract data from json_block
         substrate = SubstrateInterface(SUBSTRATE_RPC_URL)
 
