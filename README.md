@@ -4,7 +4,9 @@ Polkascan PRE Harvester Python Application
 ## 使用docker开发
 
 ### 运行mysql
+```
 docker-compose up -d mysql
+```
 
 ### 连上mysql
 - 方法1：进入容器  
