@@ -576,3 +576,24 @@ class RuntimeType(BaseModel):
     spec_version = sa.Column(sa.Integer(), nullable=False)
     type_string = sa.Column(sa.String(255))
     decoder_class = sa.Column(sa.String(255), nullable=True)
+
+
+class Transfer(BaseModel):
+    __tablename__ = 'data_transfer'
+
+    id = sa.Column(sa.Integer(), primary_key=True)
+    block_id = sa.Column(sa.Integer(), nullable=False)
+    extrinsic_idx = sa.Column(sa.Integer(), nullable=False)
+    data_extrinsic_idx = sa.Column(sa.Integer(), nullable=False)
+    trans_from = sa.Column(sa.String(255))
+    from_raw = sa.Column(sa.String(255))
+    transfer_to = sa.Column(sa.String(255))
+    to_raw = sa.Column(sa.String(255))
+    hash = sa.Column(sa.String(255))
+    amount = sa.Column(sa.DECIMAL(precision=32, scale=16), nullable=False)
+    block_timestamp = sa.Column(sa.DateTime(timezone=True), nullable=True)
+    module_id = sa.Column(sa.String(64), nullable=False)
+    sucess = sa.Column(sa.SmallInteger(), nullable=True)
+    error = sa.Column(sa.SmallInteger(), nullable=True)
+    created_at = sa.Column(sa.DateTime(timezone=True), nullable=False)
+    updated_at = sa.Column(sa.DateTime(timezone=True), nullable=False)

@@ -21,9 +21,9 @@ def upgrade():
                     sa.Column('block_id', sa.Integer(), nullable=False),
                     sa.Column('extrinsic_idx', sa.Integer(), nullable=False),
                     sa.Column('data_extrinsic_idx', sa.String(255), nullable=False),
-                    sa.Column('from', sa.String(255), nullable=True),
+                    sa.Column('transfer_from', sa.String(255), nullable=True),
                     sa.Column('from_raw', sa.String(255), nullable=True),
-                    sa.Column('to', sa.String(255), nullable=True),
+                    sa.Column('transfer_to', sa.String(255), nullable=True),
                     sa.Column('to_raw', sa.String(255), nullable=True),
                     sa.Column('hash', sa.String(255), nullable=True),
                     sa.Column('amount', sa.DECIMAL(precision=32, scale=16), nullable=False),
@@ -38,8 +38,8 @@ def upgrade():
 
     op.create_index(op.f('ix_data_transfer_extrinsic_idx'), 'data_transfer', ['extrinsic_idx'], unique=False)
     op.create_index(op.f('ix_data_transfer_block_id'), 'data_transfer', ['block_id'], unique=False)
-    op.create_index(op.f('ix_data_transfer_from'), 'data_transfer', ['from'], unique=False)
-    op.create_index(op.f('ix_data_transfer_to'), 'data_transfer', ['to'], unique=False)
+    op.create_index(op.f('ix_data_transfer_transfer_from'), 'data_transfer', ['transfer_from'], unique=False)
+    op.create_index(op.f('ix_data_transfer_transfer_to'), 'data_transfer', ['transfer_to'], unique=False)
     op.create_index(op.f('ix_data_transfer_hash'), 'data_transfer', ['hash'], unique=False)
     op.create_index(op.f('ix_data_transfer_block_timestamp'), 'data_transfer', ['block_timestamp'], unique=False)
     op.create_index(op.f('ix_data_transfer_block_module_id'), 'data_transfer', ['module_id'], unique=False)
