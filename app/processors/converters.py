@@ -20,6 +20,8 @@
 import math
 
 import time
+
+import decimal
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.processors import NewSessionEventProcessor
@@ -668,7 +670,8 @@ class PolkascanHarvesterService(BaseService):
             print(extrinsic_data.get('call_module_function'), '=========================================', end='')
             #print(extrinsic_data.get('call_module_function') == 'set_heads', '*****************************************', end='')
 
-            if extrinsic_data.get('call_module_function') == 'balances':
+            if extrinsic_data.get('call_module_function') == 'transfer':
+                print(extrinsic_data.get('params'), '~~~~~~=========================================~~~~~~~~', end='')
                 if len(extrinsic_data.get('params')) > 1:
                     _amount = extrinsic_data.get('params')[1].get('value')
                 else:
@@ -683,13 +686,13 @@ class PolkascanHarvesterService(BaseService):
                     transfer_to=extrinsic_data.get('params')[0].get('value'),
                     to_raw=extrinsic_data.get('params')[0].get('valueRaw'),
                     hash=model.extrinsic_hash,
-                    amount=_amount,
+                    amount=decimal.Decimal(_amount),
                     block_timestamp=block.datetime,
                     module_id=extrinsic_data.get('call_module'),
                     success=int(extrinsic_success),
                     error=int(not extrinsic_success),
-                    created_at=time.asctime(time.localtime(time.time())),
-                    updated_at=time.asctime(time.localtime(time.time()))
+                    created_at=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+                    updated_at=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())#time.asctime(time.localtime(time.time()))
                 )
                 print('block_id', transfer.block_id, '=========================================', end='')
                 print('extrinsic_idx', transfer.extrinsic_idx, '=========================================', end='')

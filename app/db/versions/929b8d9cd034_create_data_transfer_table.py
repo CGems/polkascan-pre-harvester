@@ -26,7 +26,7 @@ def upgrade():
                     sa.Column('transfer_to', sa.String(255), nullable=True),
                     sa.Column('to_raw', sa.String(255), nullable=True),
                     sa.Column('hash', sa.String(255), nullable=True),
-                    sa.Column('amount', sa.DECIMAL(precision=32, scale=16), nullable=False),
+                    sa.Column('amount', sa.DECIMAL(precision=65, scale=16), nullable=False),
                     sa.Column('block_timestamp', sa.DateTime(timezone=True), nullable=True),
                     sa.Column('module_id', sa.String(64), nullable=False),
                     sa.Column('success', sa.SmallInteger(), nullable=True),

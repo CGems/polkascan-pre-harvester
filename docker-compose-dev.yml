@@ -60,4 +60,4 @@ services:
       - '30333:30333'
       - '9933:9933'
       - '9944:9944'
-    command: --dev --rpc-port 9933 --rpc-external --pruning=10000000
+    command: --rpc-port 9933 --rpc-external --pruning=10000000
