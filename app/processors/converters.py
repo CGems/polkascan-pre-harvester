@@ -19,6 +19,9 @@
 #  converters.py
 import math
 
+import time
+
+import decimal
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.processors import NewSessionEventProcessor
@@ -36,7 +39,7 @@ from app.settings import DEBUG, SUBSTRATE_RPC_URL, ACCOUNT_AUDIT_TYPE_NEW, ACCOU
     SUBSTRATE_MOCK_EXTRINSICS
 from app.models.data import Extrinsic, Block, Event, Runtime, RuntimeModule, RuntimeCall, RuntimeCallParam, \
     RuntimeEvent, RuntimeEventAttribute, RuntimeType, RuntimeStorage, BlockTotal, RuntimeConstant, AccountAudit, \
-    AccountIndexAudit
+    AccountIndexAudit, Transfer
 
 
 class HarvesterCouldNotAddBlock(Exception):
@@ -664,6 +667,31 @@ class PolkascanHarvesterService(BaseService):
             )
             model.save(self.db_session)
 
+            if extrinsic_data.get('call_module_function') == 'transfer':
+                if len(extrinsic_data.get('params')) > 1:
+                    _amount = extrinsic_data.get('params')[1].get('value')
+                else:
+                    _amount = extrinsic_data.get('params')[0].get('value')
+
+                transfer = Transfer(
+                    block_id=block.id,
+                    extrinsic_idx=model.extrinsic_idx,
+                    data_extrinsic_idx=str(block_id) + '_' + str(model.extrinsic_idx),
+                    transfer_from=extrinsic_data.get('account_id'),
+                    from_raw=model.address,
+                    transfer_to=extrinsic_data.get('params')[0].get('value'),
+                    to_raw=extrinsic_data.get('params')[0].get('valueRaw'),
+                    hash=model.extrinsic_hash,
+                    amount=decimal.Decimal(_amount),
+                    block_timestamp=block.datetime,
+                    module_id=extrinsic_data.get('call_module'),
+                    success=int(extrinsic_success),
+                    error=int(not extrinsic_success),
+                    created_at=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+                    updated_at=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())#time.asctime(time.localtime(time.time()))
+                )
+                transfer.save(self.db_session)
+
             extrinsics.append(model)
 
             extrinsic_idx += 1
@@ -684,6 +712,7 @@ class PolkascanHarvesterService(BaseService):
             for processor_class in ProcessorRegistry().get_extrinsic_processors(model.module_id, model.call_id):
                 extrinsic_processor = processor_class(block, model)
                 extrinsic_processor.accumulation_hook(self.db_session)
+
 
         # Process event processors
         for event in events:
