@@ -667,11 +667,7 @@ class PolkascanHarvesterService(BaseService):
             )
             model.save(self.db_session)
 
-            print(extrinsic_data.get('call_module_function'), '=========================================', end='')
-            #print(extrinsic_data.get('call_module_function') == 'set_heads', '*****************************************', end='')
-
             if extrinsic_data.get('call_module_function') == 'transfer':
-                print(extrinsic_data.get('params'), '~~~~~~=========================================~~~~~~~~', end='')
                 if len(extrinsic_data.get('params')) > 1:
                     _amount = extrinsic_data.get('params')[1].get('value')
                 else:
@@ -694,19 +690,6 @@ class PolkascanHarvesterService(BaseService):
                     created_at=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
                     updated_at=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())#time.asctime(time.localtime(time.time()))
                 )
-                print('block_id', transfer.block_id, '=========================================', end='')
-                print('extrinsic_idx', transfer.extrinsic_idx, '=========================================', end='')
-                print('data_extrinsic_idx', transfer.data_extrinsic_idx, '===================================', end='')
-                print('from_raw', transfer.from_raw, '=========================================', end='')
-                print('transfer_to', transfer.transfer_to, '=========================================', end='')
-                print('to_raw', transfer.to_raw, '=========================================', end='')
-                print('hash', transfer.hash, '=========================================', end='')
-                print('amount', transfer.amount, '=========================================', end='')
-                print('block_timestamp', transfer.block_timestamp, '=========================================', end='')
-                print('module_id', transfer.module_id, '=========================================', end='')
-                print('success', transfer.success, '=========================================', end='')
-                print('created_at', transfer.created_at, '=========================================', end='')
-                print('updated_at', transfer.updated_at, '=========================================', end='')
                 transfer.save(self.db_session)
 
             extrinsics.append(model)
