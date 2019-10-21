@@ -24,7 +24,7 @@ import time
 import decimal
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.processors import NewSessionEventProcessor
+from app.processors import NewSessionEventProcessor, datetime, ss58_encode
 from app.type_registry import load_type_registry
 from scalecodec import U32
 from scalecodec.base import ScaleBytes, ScaleDecoder, RuntimeConfiguration
@@ -499,7 +499,7 @@ class PolkascanHarvesterService(BaseService):
         self.process_metadata(json_runtime_version, block_hash)
 
         # ==== Get parent block runtime ===================
-
+        print("......................block_id = ?", block_id)
         if block_id > 0:
             json_parent_runtime_version = substrate.get_block_runtime_version(parent_hash)
 
@@ -633,7 +633,6 @@ class PolkascanHarvesterService(BaseService):
                     data=ScaleBytes(extrinsic),
                     metadata=self.metadata_store[parent_spec_version]
                 )
-
             extrinsic_data = extrinsics_decoder.decode()
 
             # Lookup result of extrinsic
@@ -673,22 +672,29 @@ class PolkascanHarvesterService(BaseService):
                 else:
                     _amount = extrinsic_data.get('params')[0].get('value')
 
+                # [{'type': 'AccountId', 'value': '0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d',
+                #   'valueRaw': 'd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d'},
+                #  {'type': 'AccountId', 'value': '0x8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48',
+                #   'valueRaw': '8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48'}]
+
+                account_ids = events_decoder.value[1].get('params')[0:2]
+
                 transfer = Transfer(
                     block_id=block.id,
                     extrinsic_idx=model.extrinsic_idx,
                     data_extrinsic_idx=str(block_id) + '_' + str(model.extrinsic_idx),
-                    transfer_from=extrinsic_data.get('account_id'),
-                    from_raw=model.address,
-                    transfer_to=extrinsic_data.get('params')[0].get('value'),
-                    to_raw=extrinsic_data.get('params')[0].get('valueRaw'),
-                    hash=model.extrinsic_hash,
+                    transfer_from=ss58_encode(account_ids[0]['valueRaw']),
+                    from_raw=account_ids[0]['valueRaw'],
+                    transfer_to=ss58_encode(account_ids[1]['valueRaw']),
+                    to_raw=account_ids[1]['valueRaw'],
+                    hash=block_hash,
                     amount=decimal.Decimal(_amount),
                     block_timestamp=block.datetime,
                     module_id=extrinsic_data.get('call_module'),
                     success=int(extrinsic_success),
                     error=int(not extrinsic_success),
-                    created_at=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
-                    updated_at=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())#time.asctime(time.localtime(time.time()))
+                    created_at=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                    updated_at=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")#time.asctime(time.localtime(time.time()))
                 )
                 transfer.save(self.db_session)
 
@@ -794,3 +800,4 @@ class PolkascanHarvesterService(BaseService):
         sequenced_block.save(self.db_session)
 
         return sequenced_block
+
