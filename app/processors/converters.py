@@ -499,7 +499,6 @@ class PolkascanHarvesterService(BaseService):
         self.process_metadata(json_runtime_version, block_hash)
 
         # ==== Get parent block runtime ===================
-        print("......................block_id = ?", block_id)
         if block_id > 0:
             json_parent_runtime_version = substrate.get_block_runtime_version(parent_hash)
 
