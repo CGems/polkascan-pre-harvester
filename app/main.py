@@ -55,4 +55,4 @@ app.add_route('/tools/metadata/extract', ExtractMetadataResource())
 app.add_route('/tools/extrinsics/extract', ExtractExtrinsicsResource())
 app.add_route('/tools/events/extract', ExtractEventsResource())
 
-app.add_route('/backtracking', PolkascanBacktrackingResource())
+app.add_route('/backtracking/', PolkascanBacktrackingResource())

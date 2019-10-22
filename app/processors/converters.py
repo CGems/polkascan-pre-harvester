@@ -50,6 +50,10 @@ class BlockAlreadyAdded(Exception):
     pass
 
 
+class BlockNotFound(Exception):
+    pass
+
+
 class PolkascanHarvesterService(BaseService):
 
     def __init__(self, db_session, type_registry='default'):
