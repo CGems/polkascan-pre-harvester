@@ -590,7 +590,7 @@ class Transfer(BaseModel):
     transfer_to = sa.Column(sa.String(255))
     to_raw = sa.Column(sa.String(255))
     hash = sa.Column(sa.String(255))
-    amount = sa.Column(sa.DECIMAL(precision=65, scale=16), nullable=False)
+    amount = sa.Column(sa.DECIMAL(precision=65, scale=0), nullable=False)
     block_timestamp = sa.Column(sa.DateTime(timezone=True), nullable=True)
     module_id = sa.Column(sa.String(64), nullable=False)
     success = sa.Column(sa.SmallInteger(), nullable=True)
