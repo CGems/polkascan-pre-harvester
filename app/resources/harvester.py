@@ -35,6 +35,33 @@ from app.tasks import accumulate_block_recursive, start_harvester
 from app.settings import SUBSTRATE_RPC_URL, TYPE_REGISTRY
 
 
+class PolkascanBacktrackingResource(BaseResource):
+
+    def on_post(self, req, resp):
+
+        block = Block.query(self.session).order_by(Block.id.asc()).first()
+        if block and block.id != 1:
+            harvester = PolkascanHarvesterService(self.session, type_registry=TYPE_REGISTRY)
+            block_hash = block.parent_hash
+            for nr in range(0, block.id - 1):
+                try:
+                    block = harvester.add_block(block_hash)
+                except BlockAlreadyAdded as e:
+                    print('Skipping {}'.format(block_hash))
+                block_hash = block.parent_hash
+                if block.id == 0:
+                    break
+
+            self.session.commit()
+
+        resp.media = {
+            'status': 'success',
+            'data': {
+                'message': 'TODO'
+            }
+        }
+
+
 class PolkascanStartHarvesterResource(BaseResource):
 
     #@validate(load_schema('start_harvester'))
