@@ -19,6 +19,8 @@ services:
     depends_on:
       - redis
       - mysql
+#    stdin_open: true
+#    tty: true
 
   harvester-worker:
     build: .

@@ -50,6 +50,15 @@ alembic 类似rails 中的rake
   alembic downgrade -1
 ```
 
+### docker-compose debugger
+```
+ 1、在docker-compose.yml 增加配置，详见harvester-api
+ 2、在相应需要debugger的地方 import pdb; pdb.set_trace()
+ 3、docker container ps
+ 4、docker attach CONTAINER_ID
+
+```
+
 
 ## Description
 The Polkascan PRE Harvester Application transforms a Substrate node's raw data into relational data for various classes of objects, such as: blocks, runtime metadata entities, extrinsics, events and various runtime data entities, such as: timestamps, accounts and balances.

@@ -29,17 +29,22 @@ from sqlalchemy import text
 from app.models.data import Block, BlockTotal
 from app.resources.base import BaseResource
 from app.schemas import load_schema
-from app.processors.converters import PolkascanHarvesterService, BlockAlreadyAdded
+from app.processors.converters import PolkascanHarvesterService, BlockAlreadyAdded, BlockNotFound
 from substrateinterface import SubstrateInterface
 from app.tasks import accumulate_block_recursive, start_harvester
 from app.settings import SUBSTRATE_RPC_URL, TYPE_REGISTRY
 
 
 class PolkascanBacktrackingResource(BaseResource):
-
+    ## POST raw
     def on_post(self, req, resp):
 
-        block = Block.query(self.session).order_by(Block.id.asc()).first()
+        msg = "TODO"
+        if req.media.get('start_hash'):
+            block = Block.query(self.session).filter(Block.hash == req.media.get('start_hash')).first()
+        else:
+            block = Block.query(self.session).order_by(Block.id.asc()).first()
+
         if block and block.id != 1:
             harvester = PolkascanHarvesterService(self.session, type_registry=TYPE_REGISTRY)
             block_hash = block.parent_hash
@@ -54,12 +59,17 @@ class PolkascanBacktrackingResource(BaseResource):
 
             self.session.commit()
 
-        resp.media = {
-            'status': 'success',
-            'data': {
-                'message': 'TODO'
+            resp.media = {
+                'status': 'success',
+                'data': {
+                    'message': msg
+                }
             }
-        }
+        else:
+            resp.status = falcon.HTTP_404
+            resp.media = {'result': 'Block not found'}
+
+
 
 
 class PolkascanStartHarvesterResource(BaseResource):

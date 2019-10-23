@@ -50,6 +50,10 @@ class BlockAlreadyAdded(Exception):
     pass
 
 
+class BlockNotFound(Exception):
+    pass
+
+
 class PolkascanHarvesterService(BaseService):
 
     def __init__(self, db_session, type_registry='default'):
@@ -686,7 +690,7 @@ class PolkascanHarvesterService(BaseService):
                     from_raw=account_ids[0]['valueRaw'],
                     transfer_to=ss58_encode(account_ids[1]['valueRaw']),
                     to_raw=account_ids[1]['valueRaw'],
-                    hash=block_hash,
+                    hash=model.extrinsic_hash,
                     amount=decimal.Decimal(_amount),
                     block_timestamp=block.datetime,
                     module_id=extrinsic_data.get('call_module'),
