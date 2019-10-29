@@ -14,7 +14,7 @@ RUN pip3 install --upgrade pip
 COPY ./requirements.txt /usr/src/app/requirements.txt
 
 # install requirements
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt -i http://mirrors.aliyun.com/pypi/simple/
 
 RUN apk del .build-deps gcc libc-dev git
 
