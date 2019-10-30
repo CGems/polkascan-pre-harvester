@@ -129,7 +129,6 @@ class AccountBlockProcessor(BlockProcessor):
                 account.updated_at_block = self.block.id
 
             except NoResultFound:
-                print(".................................#{}", type(self), self.block.id, self.sequenced_block)
 
                 account = Account(
                     id=account_audit.account_id,
@@ -138,7 +137,7 @@ class AccountBlockProcessor(BlockProcessor):
                     updated_at_block=self.block.id,
                     balance=0
                 )
-
+                ### account balance
                 substrate = SubstrateInterface(SUBSTRATE_RPC_URL)
                 balance = substrate.get_storage(
                     block_hash=None,

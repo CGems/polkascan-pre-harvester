@@ -26,13 +26,46 @@ from celery.result import AsyncResult
 from falcon.media.validators.jsonschema import validate
 from sqlalchemy import text
 
-from app.models.data import Block, BlockTotal
+from app.models.data import Block, BlockTotal, Account
 from app.resources.base import BaseResource
 from app.schemas import load_schema
 from app.processors.converters import PolkascanHarvesterService, BlockAlreadyAdded, BlockNotFound
 from substrateinterface import SubstrateInterface
 from app.tasks import accumulate_block_recursive, start_harvester
 from app.settings import SUBSTRATE_RPC_URL, TYPE_REGISTRY
+
+
+class PolkascanAccountBalance(BaseResource):
+    ## POST raw
+    def on_post(self, req, resp):
+
+        msg = "TODO"
+        if req.media.get('account_id'):
+            account = Account.query(self.session).filter(Account.id == req.media.get('account_id')).first()
+
+            if account:
+                substrate = SubstrateInterface(SUBSTRATE_RPC_URL)
+                balance = substrate.get_storage(
+                    block_hash=None,
+                    module='Balances',
+                    function='FreeBalance',
+                    params=account.id,
+                    return_scale_type='Balance',
+                    hasher='Blake2_256') or 0
+
+                account.balance = balance
+                self.session.commit()
+
+                resp.media = {
+                    'status': 'success',
+                    'data': {
+                        'message': msg
+                    }
+                }
+        else:
+            resp.status = falcon.HTTP_404
+            resp.media = {'result': 'Account not found'}
+
 
 
 class PolkascanBacktrackingResource(BaseResource):
