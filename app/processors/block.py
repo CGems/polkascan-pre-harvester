@@ -30,10 +30,11 @@ from app.settings import ACCOUNT_AUDIT_TYPE_NEW, ACCOUNT_AUDIT_TYPE_REAPED, ACCO
     DEMOCRACY_REFERENDUM_AUDIT_TYPE_STARTED, DEMOCRACY_REFERENDUM_AUDIT_TYPE_PASSED, \
     DEMOCRACY_REFERENDUM_AUDIT_TYPE_NOTPASSED, DEMOCRACY_REFERENDUM_AUDIT_TYPE_CANCELLED, \
     DEMOCRACY_REFERENDUM_AUDIT_TYPE_EXECUTED, SUBSTRATE_ADDRESS_TYPE, DEMOCRACY_VOTE_AUDIT_TYPE_NORMAL, \
-    DEMOCRACY_VOTE_AUDIT_TYPE_PROXY
+    DEMOCRACY_VOTE_AUDIT_TYPE_PROXY, SUBSTRATE_RPC_URL
 from app.utils.ss58 import ss58_encode, ss58_encode_account_index
 from scalecodec.base import ScaleBytes
 
+from substrateinterface import SubstrateInterface
 from app.processors.base import BlockProcessor
 from scalecodec.block import LogDigest
 
@@ -128,6 +129,7 @@ class AccountBlockProcessor(BlockProcessor):
                 account.updated_at_block = self.block.id
 
             except NoResultFound:
+                print(".................................#{}", type(self), self.block.id, self.sequenced_block)
 
                 account = Account(
                     id=account_audit.account_id,
@@ -137,6 +139,16 @@ class AccountBlockProcessor(BlockProcessor):
                     balance=0
                 )
 
+                substrate = SubstrateInterface(SUBSTRATE_RPC_URL)
+                balance = substrate.get_storage(
+                    block_hash=None,
+                    module='Balances',
+                    function='FreeBalance',
+                    params=account_audit.account_id,
+                    return_scale_type='Balance',
+                    hasher='Blake2_256') or 0
+
+                account.balance = balance
                 # If reaped but does not exist, create new account for now
                 if account_audit.type_id != ACCOUNT_AUDIT_TYPE_NEW:
                     account.is_reaped = True
