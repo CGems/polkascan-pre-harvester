@@ -2,3 +2,6 @@
 	path = py-substrate-interface
 	url = https://github.com/polkascan/py-substrate-interface.git
 
+[submodule "py-scale-codec"]
+	path = py-scale-codec
+	url = https://github.com/CGems/py-scale-codec.git
