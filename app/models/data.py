@@ -73,6 +73,7 @@ class Block(BaseModel):
     logs = sa.Column(sa.JSON(), default=None, server_default=None)
     spec_version_id = sa.Column(sa.String(64), nullable=False)
     debug_info = sa.Column(sa.JSON(), default=None, server_default=None)
+    account_index = sa.Column(sa.Integer(), nullable=True)
 
     def set_datetime(self, datetime):
         self.datetime = datetime
