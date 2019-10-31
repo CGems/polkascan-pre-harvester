@@ -60,7 +60,6 @@ class LogBlockProcessor(BlockProcessor):
                     res.decode(check_remaining=False)
                     self.block.account_index = res.value.get("Primary").get("authorityIndex")
 
-                print(".................................", self.block.account_index, res.value, self.block.__dict__)
                 self.block.save(db_session)
 
             log = Log(
