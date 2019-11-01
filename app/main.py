@@ -58,4 +58,4 @@ app.add_route('/tools/events/extract', ExtractEventsResource())
 
 app.add_route('/backtracking/', PolkascanBacktrackingResource())
 app.add_route('/account/balance', PolkascanAccountBalance())
-app.add_route('/block/sync_account_index', PolkascanSyncAccounId())
+app.add_route('/block/sync_account_index', PolkascanSyncAccountId())
