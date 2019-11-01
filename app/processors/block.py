@@ -51,16 +51,16 @@ class LogBlockProcessor(BlockProcessor):
 
             if log_digest.index_value == "PreRuntime":
                 data = log_digest.value.get('value').get('data')
-                # if not data:
-                res = RawBabePreDigest(ScaleBytes("0x{}".format(data)))
-                if data[0:1] and len(data) == 34:
-                    res.decode()
-                    self.block.account_index = res.value.get("Secondary").get("authorityIndex")
-                else:
-                    res.decode(check_remaining=False)
-                    self.block.account_index = res.value.get("Primary").get("authorityIndex")
+                if data:
+                    res = RawBabePreDigest(ScaleBytes("0x{}".format(data)))
+                    if data[0:2] == "01" and len(data) == 34:
+                        res.decode()
+                        self.block.account_index = res.value.get("Secondary").get("authorityIndex")
+                    else:
+                        res.decode(check_remaining=False)
+                        self.block.account_index = res.value.get("Primary").get("authorityIndex")
 
-                self.block.save(db_session)
+                    self.block.save(db_session)
 
             log = Log(
                 block_id=self.block.id,
