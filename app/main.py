@@ -31,7 +31,7 @@ from app.middleware.sessionmanager import SQLAlchemySessionManager
 from app.resources.harvester import PolkascanStartHarvesterResource, PolkascanStopHarvesterResource, \
     PolkascanStatusHarvesterResource, PolkascanProcessBlockResource, \
     PolkaScanCheckHarvesterTaskResource, SequenceBlockResource, PolkascanBacktrackingResource, PolkascanAccountBalance, \
-    PolkascanSyncAccounId
+    PolkascanSyncAccounId, PolkascanSyncAccountId
 from app.resources.tools import ExtractMetadataResource, ExtractExtrinsicsResource, \
     HealthCheckResource, ExtractEventsResource
 
