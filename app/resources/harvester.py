@@ -23,16 +23,50 @@ import uuid
 
 import falcon
 from celery.result import AsyncResult
-from falcon.media.validators.jsonschema import validate
-from sqlalchemy import text
+from scalecodec import ScaleBytes
+from scalecodec.block import RawBabePreDigest
+from sqlalchemy.sql.operators import isnot
 
-from app.models.data import Block, BlockTotal, Account
+from app.models.data import Block, BlockTotal, Account, Log
 from app.resources.base import BaseResource
-from app.schemas import load_schema
-from app.processors.converters import PolkascanHarvesterService, BlockAlreadyAdded, BlockNotFound
+from app.processors.converters import PolkascanHarvesterService, BlockAlreadyAdded
 from substrateinterface import SubstrateInterface
-from app.tasks import accumulate_block_recursive, start_harvester
+from app.tasks import start_harvester
 from app.settings import SUBSTRATE_RPC_URL, TYPE_REGISTRY
+
+
+class PolkascanSyncAccounId(BaseResource):
+    def on_get(self, req, resp):
+
+        msg = "TODO"
+        db_session = self.session
+        blocks = Block.query(db_session).filter(Block.account_index.is_(None)).all()
+
+        for block in blocks:
+            log = Log.query(db_session).filter(Log.block_id == block.id).filter(Log.type == 'PreRuntime').first()
+            if log:
+                data = log.data.get("value").get("data")
+                if data:
+                    res = RawBabePreDigest(ScaleBytes("0x{}".format(data)))
+                    print("............", data)
+                    if data[0:2] == "01" and len(data) == 34:
+                        res.decode()
+                        block.account_index = res.value.get("Secondary").get("authorityIndex")
+                    else:
+                        res.decode(check_remaining=False)
+                        block.account_index = res.value.get("Primary").get("authorityIndex")
+
+                    block.save(db_session)
+            else:
+                resp.status = falcon.HTTP_404
+                resp.media = {'result': 'Blocks not found'}
+
+        resp.media = {
+            'status': 'success',
+            'data': {
+                'message': msg
+            }
+        }
 
 
 class PolkascanAccountBalance(BaseResource):

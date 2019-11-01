@@ -36,7 +36,7 @@ from scalecodec.base import ScaleBytes
 
 from substrateinterface import SubstrateInterface
 from app.processors.base import BlockProcessor
-from scalecodec.block import LogDigest
+from scalecodec.block import LogDigest, RawBabePreDigest
 
 
 class LogBlockProcessor(BlockProcessor):
@@ -48,6 +48,19 @@ class LogBlockProcessor(BlockProcessor):
         for idx, log_data in enumerate(self.block.logs):
             log_digest = LogDigest(ScaleBytes(log_data))
             log_digest.decode()
+
+            if log_digest.index_value == "PreRuntime":
+                data = log_digest.value.get('value').get('data')
+                if data:
+                    res = RawBabePreDigest(ScaleBytes("0x{}".format(data)))
+                    if data[0:2] == "01" and len(data) == 34:
+                        res.decode()
+                        self.block.account_index = res.value.get("Secondary").get("authorityIndex")
+                    else:
+                        res.decode(check_remaining=False)
+                        self.block.account_index = res.value.get("Primary").get("authorityIndex")
+
+                    self.block.save(db_session)
 
             log = Log(
                 block_id=self.block.id,
