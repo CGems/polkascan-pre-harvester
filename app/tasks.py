@@ -22,13 +22,15 @@ import os
 from time import sleep
 
 import celery
+from scalecodec import ScaleBytes
+from scalecodec.block import RawBabePreDigest
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import func
 
-from app.models.data import Extrinsic, Block, BlockTotal
+from app.models.data import Extrinsic, Block, BlockTotal, Log
 from app.processors.converters import PolkascanHarvesterService, HarvesterCouldNotAddBlock, BlockAlreadyAdded
 from substrateinterface import SubstrateInterface
 
@@ -246,3 +248,35 @@ def sequence_block_recursive(self, parent_block_data, parent_sequenced_block_dat
                 return {'error': 'Sequencer already started', 'exception': str(e)}
         else:
             return {'error': 'Block {} not found'.format(block_id)}
+
+
+@app.task(base=BaseTask, bind=True)
+def sync_block_account_id(self):
+
+    db_session = self.session
+    blocks = Block.query(db_session).filter(Block.account_index.is_(None)).all()
+
+    for block in blocks:
+        log = Log.query(db_session).filter(Log.block_id == block.id).filter(Log.type == 'PreRuntime').first()
+        if log:
+            data = log.data.get("value").get("data")
+            if data:
+                if data[0:2] != "01" and data[0:2] != "00":
+                    continue
+
+                res = RawBabePreDigest(ScaleBytes("0x{}".format(data)))
+                if data[0:2] == "01" and len(data) == 34:
+                    res.decode()
+                    block.account_index = res.value.get("Secondary").get("authorityIndex")
+                elif data[0:2] == "00":
+                    res.decode(check_remaining=False)
+                    block.account_index = res.value.get("Primary").get("authorityIndex")
+                else:
+                    raise "error log data ".format(data)
+
+                block.save(db_session)
+                print("...................", block.id, block.account_index)
+        else:
+            print("...................", "Blocks not found")
+
+    db_session.commit()
